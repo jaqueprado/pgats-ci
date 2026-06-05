@@ -1,41 +1,100 @@
 # This config was automatically generated from your source code
 # Stacks detected: cicd:github-actions:.github/workflows,deps:node:.,package_manager:yarn:,test:jest:
 version: 2.1
-orbs:
-  node: circleci/node@5
-jobs:
-  test-node:
-    # Install node dependencies and run tests
-    executor: node/default
+
+# Definindo o ambiente (Node 24) e variáveis globais
+executors:
+  node-executor:
+    docker:
+      - image: node:24
     environment:
-      JEST_JUNIT_OUTPUT_DIR: ./test-results/
+      NODE_ENV: 'test'
+      CI_TIMEOUT: '1800'
+
+jobs:
+  # Job: Linting e Type Checking
+  lint:
+    executor: node-executor
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: yarn
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package-lock.json" }}
       - run:
-          command: yarn add jest-junit --ignore-workspace-root-check
+          name: Instalar dependências (npm ci)
+          command: npm ci
+      - save_cache:
+          paths:
+            - ./node_modules
+          key: v1-deps-{{ checksum "package-lock.json" }}
       - run:
-          name: Run tests
-          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
-      - store_test_results:
-          path: ./test-results/
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
-    docker:
-      - image: cimg/base:stable
+          name: Executar Lint TS
+          command: npm run lint:ts
+      - run:
+          name: Executar Lint Format
+          command: npm run lint:format
+
+  # Job: Testes Unitários (Atualizado para usar Yarn)
+  test-unit:
+    executor: node-executor
+    parallelism: 3
     steps:
-      # Replace this with steps to deploy to users
+      - checkout
+      # Tenta restaurar o cache buscando pelo yarn.lock primeiro
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "yarn.lock" }}
+            - v1-deps-{{ checksum "package-lock.json" }}
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          name: Instalar dependências
+          command: |
+            if [ -f yarn.lock ]; then
+              yarn install --frozen-lockfile
+            else
+              npm ci
+            fi
+      - save_cache:
+          paths:
+            - ./node_modules
+          key: v1-deps-{{ checksum "yarn.lock" }}
       - run:
-          name: found github actions config
-          command: ':'
+          name: Executar testes unitários com Yarn
+          command: yarn run test --coverage
+      - store_artifacts:
+          path: reports/coverage/
+          destination: coverage-report
+
+  # Job: Testes E2E (Playwright)
+  test-e2e:
+    executor: node-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package-lock.json" }}
+      - run:
+          name: Instalar dependências (npm ci)
+          command: npm ci
+      - run:
+          name: Instalar dependências do Playwright
+          command: npx playwright install --with-deps
+      - run:
+          name: Executar testes E2E
+          command: npm run e2e
+      - store_artifacts:
+          path: playwright-report/
+          destination: playwright-report
+      - store_artifacts:
+          path: test-results/
+          destination: test-results
+
+# Orquestração dos Jobs
 workflows:
-  build-and-test:
+  quality-workflow:
     jobs:
-      - test-node
-    # - deploy:
-    #     requires:
-    #       - test-node
+      - lint
+      - test-unit
+      - test-e2e:
+          requires:
+            - lint
+            - test-unit
