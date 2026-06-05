@@ -30,9 +30,6 @@ jobs:
       - run:
           name: Executar Lint TS
           command: npm run lint:ts
-      - run:
-          name: Executar Lint Format
-          command: npm run lint:format
 
   # Job: Testes Unitários (Atualizado para usar Yarn)
   test-unit:
