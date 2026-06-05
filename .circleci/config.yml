@@ -63,10 +63,6 @@ jobs:
 
   # Job: Testes E2E (Playwright)
   test-e2e:
-  build:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.29.0-focal
-    working_directory: ~/app
     steps:
       - checkout
       - restore_cache:
