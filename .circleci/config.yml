@@ -64,17 +64,17 @@ jobs:
   # Job: Testes E2E (Playwright)
   test-e2e:
   build:
-     docker:
-       - image: mcr.microsoft.com/playwright:v1.29.0-focal
-     working_directory: ~/app
-     steps:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.29.0-focal
+    working_directory: ~/app
+    steps:
       - checkout
       - restore_cache:
           keys:
             - v1-deps-{{ checksum "package-lock.json" }}
       - run: npm i -D @playwright/test
       - run: npx playwright install chrome
-          no_output_timeout: 20m
+        no_output_timeout: 20m
       - run:
           name: Executar testes E2E
           command: npm run e2e
