@@ -71,13 +71,10 @@ jobs:
             - v1-deps-{{ checksum "package-lock.json" }}
       - run:
           name: Instalar dependências (npm ci)
-          command: npm install --legacy-peer-deps 
+          command: npm install --legacy-peer-deps
       - run:
           name: Instalar Playwright
-          command: npm i -D @playwright/test
-      - run:
-          name: Instalar browser
-          command: npx playwright install chromium
+          command: npx playwright install
           no_output_timeout: 20m
       - run:
           name: Executar testes E2E
