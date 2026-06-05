@@ -71,13 +71,13 @@ jobs:
             - v1-deps-{{ checksum "package-lock.json" }}
       - run:
           name: Instalar dependências (npm ci)
-          command: npm install --legacy-peer-deps
       - run:
           name: Instalar dependências do Playwright
-          command: yarn playwright install
+          command: npx playwright install --with-deps
+          no_output_timeout: 20m
       - run:
           name: Executar testes E2E
-          command: yarn run e2e
+          command: npm run e2e
       - store_artifacts:
           path: playwright-report/
           destination: playwright-report
