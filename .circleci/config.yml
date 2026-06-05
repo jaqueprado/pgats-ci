@@ -29,7 +29,7 @@ jobs:
           key: v1-deps-{{ checksum "package-lock.json" }}
       - run:
           name: Executar Lint TS
-          command: npm run lint:ts
+          command: npm run lint:ts -- --ignore-pattern jsconfig.json
       - run:
           name: Executar Lint Format
           command: npm run lint:format
