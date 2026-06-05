@@ -74,7 +74,7 @@ jobs:
           command: npm install --legacy-peer-deps
       - run:
           name: Instalar dependências do Playwright
-          command: npx playwright install --with-deps
+          command: npx playwright install
       - run:
           name: Executar testes E2E
           command: npm run e2e
