@@ -15,7 +15,7 @@ executors:
   playwright-executor:
     docker:
       # IMPORTANTE: Mude 'v1.44.0' para a mesma versão do Playwright que está no seu package.json
-      - image: mcr.microsoft.com/playwright:v1.44.0-jammy
+      - image: mcr.microsoft.com/playwright:v1.60.0-jammy
     environment:
       NODE_ENV: 'test'
 
