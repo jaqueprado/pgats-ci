@@ -74,10 +74,10 @@ jobs:
           command: npm install --legacy-peer-deps
       - run:
           name: Instalar dependências do Playwright
-          command: npx playwright install
+          command: yarn playwright install
       - run:
           name: Executar testes E2E
-          command: npm run e2e
+          command: yarn run e2e
       - store_artifacts:
           path: playwright-report/
           destination: playwright-report
