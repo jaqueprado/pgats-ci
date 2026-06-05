@@ -63,14 +63,22 @@ jobs:
 
   # Job: Testes E2E (Playwright)
   test-e2e:
+    executor: node-executor
     steps:
       - checkout
       - restore_cache:
           keys:
             - v1-deps-{{ checksum "package-lock.json" }}
-      - run: npm i -D @playwright/test
-      - run: npx playwright install chrome
-        no_output_timeout: 20m
+      - run:
+          name: Instalar dependências (npm ci)
+          command: npm i
+      - run:
+          name: Instalar Playwright
+          command: npm i -D @playwright/test
+      - run:
+          name: Instalar browser
+          command: npx playwright install chromium
+          no_output_timeout: 20m
       - run:
           name: Executar testes E2E
           command: npm run e2e
