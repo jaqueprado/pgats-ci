@@ -61,25 +61,27 @@ jobs:
           path: reports/coverage/
           destination: coverage-report
 
-  # Job: Testes E2E (Playwright)
-  test-e2e:
-    docker:
-      # Match the version tag to the Playwright version in your package.json
-      - image: mcr.microsoft.com/playwright:v1.49.0-focal
-    steps:
-      - checkout
-      - run:
-        name: Instalar plywright
-        command: yarn install
-      - run:
-          name: Executar testes E2E
-          command: yarn run e2e
-      - store_artifacts:
-          path: playwright-report/
-          destination: playwright-report
-      - store_artifacts:
-          path: test-results/
-          destination: test-results
+test-e2e:
+  docker:
+    # Certifique-se de que a tag (v1.49.0) bate com a versão do package.json
+    - image: mcr.microsoft.com/playwright:v1.49.0-focal
+  steps:
+    - checkout
+    - run:
+        name: Instalar dependências
+        command: yarn install --frozen-lockfile
+    - run:
+        name: Instalar navegadores do Playwright
+        command: yarn playwright install --with-deps
+    - run:
+        name: Executar testes E2E
+        command: yarn run e2e
+    - store_artifacts:
+        path: playwright-report/
+        destination: playwright-report
+    - store_artifacts:
+        path: test-results/
+        destination: test-results
 
 # Orquestração dos Jobs
 workflows:
