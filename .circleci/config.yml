@@ -2,14 +2,22 @@
 # Stacks detected: cicd:github-actions:.github/workflows,deps:node:.,package_manager:yarn:,test:jest:
 version: 2.1
 
-# Definindo o ambiente (Node 24) e variáveis globais
 executors:
+  # Executor padrão para Lint e Unit Tests
   node-executor:
     docker:
       - image: node:24
     environment:
       NODE_ENV: 'test'
       CI_TIMEOUT: '1800'
+
+  # Novo Executor focado apenas no Playwright
+  playwright-executor:
+    docker:
+      # IMPORTANTE: Mude 'v1.44.0' para a mesma versão do Playwright que está no seu package.json
+      - image: mcr.microsoft.com/playwright:v1.44.0-jammy
+    environment:
+      NODE_ENV: 'test'
 
 jobs:
   # Job: Linting e Type Checking
@@ -60,22 +68,28 @@ jobs:
       - store_artifacts:
           path: reports/coverage/
           destination: coverage-report
-
-  # Job: Testes E2E (Playwright)
+  # Job: Testes E2E (Atualizado para a imagem do Playwright)
   test-e2e:
-    executor: node-executor
+    executor: playwright-executor
     steps:
       - checkout
       - restore_cache:
           keys:
             - v1-deps-{{ checksum "package-lock.json" }}
+            - v1-deps-{{ checksum "yarn.lock" }}
       - run:
-          name: Instalar dependências (npm ci)
-          command: npm install --legacy-peer-deps
-      - run:
-          name: Instalar Playwright
-          command: npx playwright install
-          no_output_timeout: 20m
+          name: Instalar dependências
+          # Dica: npm ci ou yarn install --frozen-lockfile são mais seguros para CI
+          command: |
+            if [ -f yarn.lock ]; then
+              yarn install --frozen-lockfile
+            else
+              npm ci
+            fi
+
+      # NOTE QUE O PASSO DE INSTALAR O PLAYWRIGHT FOI REMOVIDO DAQUI
+      # A imagem mcr.microsoft.com/playwright já possui tudo embutido.
+
       - run:
           name: Executar testes E2E
           command: npm run e2e
@@ -86,7 +100,6 @@ jobs:
           path: test-results/
           destination: test-results
 
-# Orquestração dos Jobs
 workflows:
   quality-workflow:
     jobs:
