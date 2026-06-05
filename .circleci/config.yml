@@ -61,27 +61,27 @@ jobs:
           path: reports/coverage/
           destination: coverage-report
 
-test-e2e:
-  docker:
-    # Certifique-se de que a tag (v1.49.0) bate com a versão do package.json
-    - image: mcr.microsoft.com/playwright:v1.49.0-focal
-  steps:
-    - checkout
-    - run:
-        name: Instalar dependências
-        command: yarn install --frozen-lockfile
-    - run:
-        name: Instalar navegadores do Playwright
-        command: yarn playwright install --with-deps
-    - run:
-        name: Executar testes E2E
-        command: yarn run e2e
-    - store_artifacts:
-        path: playwright-report/
-        destination: playwright-report
-    - store_artifacts:
-        path: test-results/
-        destination: test-results
+  # Job: Testes E2E (Playwright)
+  test-e2e:
+    executor: node-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package-lock.json" }}
+      - run:
+          name: Instalar dependências do Playwright
+          command: npx playwright install
+          no_output_timeout: 20m
+      - run:
+          name: Executar testes E2E
+          command: npm run e2e
+      - store_artifacts:
+          path: playwright-report/
+          destination: playwright-report
+      - store_artifacts:
+          path: test-results/
+          destination: test-results
 
 # Orquestração dos Jobs
 workflows:
