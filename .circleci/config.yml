@@ -63,18 +63,17 @@ jobs:
 
   # Job: Testes E2E (Playwright)
   test-e2e:
-    executor: node-executor
-    steps:
+  build:
+     docker:
+       - image: mcr.microsoft.com/playwright:v1.29.0-focal
+     working_directory: ~/app
+     steps:
       - checkout
       - restore_cache:
           keys:
             - v1-deps-{{ checksum "package-lock.json" }}
-      - run:
-          name: Instalar dependências (npm ci)
-          command: npm install --legacy-peer-deps
-      - run:
-          name: Instalar dependências do Playwright
-          command: npx playwright install
+      - run: npm i -D @playwright/test
+      - run: npx playwright install chrome
           no_output_timeout: 20m
       - run:
           name: Executar testes E2E
