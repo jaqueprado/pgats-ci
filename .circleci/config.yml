@@ -73,8 +73,8 @@ jobs:
           keys:
             - v1-deps-{{ checksum "package-lock.json" }}
       - run:
-          name: Instalar dependências (npm install)
-          command: npm install --legacy-peer-deps
+          name: Instalar dependências (npm ci)
+          command: npm ci
       - run:
           name: Instalar dependências do Playwright
           command: npx playwright install --with-deps
