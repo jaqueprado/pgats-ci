@@ -63,22 +63,17 @@ jobs:
 
   # Job: Testes E2E (Playwright)
   test-e2e:
-    executor: node-executor
+    docker:
+      # Match the version tag to the Playwright version in your package.json
+      - image: mcr.microsoft.com/playwright:v1.49.0-focal
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-deps-{{ checksum "package-lock.json" }}
       - run:
-          name: Instalar dependências (npm ci)
-          command: npm install --legacy-peer-deps
-      - run:
-          name: Instalar dependências do Playwright
-          command: npx playwright install --with-deps
-          no_output_timeout: 20m
+        name: Instalar plywright
+        command: yarn install
       - run:
           name: Executar testes E2E
-          command: npm run e2e
+          command: yarn run e2e
       - store_artifacts:
           path: playwright-report/
           destination: playwright-report
