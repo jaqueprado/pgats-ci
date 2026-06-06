@@ -1,0 +1,17 @@
+name: Self Hosted Test
+
+on:
+  workflow_dispatch:
+jobs:
+  test-runner:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test Runner
+        run: |
+          echo "Executando no self-hosted runner"
+          hostname
+          pwd
